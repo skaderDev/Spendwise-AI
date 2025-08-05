@@ -21,6 +21,14 @@ function App() {
     return "Other";
   };
 
+  const handleParsedData = (data: Transaction[]) => {
+    const categorized = data.map((tx) => ({
+      ...tx,
+      Category: categorize(tx.Description),
+    }));
+    setTransactions(categorized);
+  };
+
   const totals = transactions.reduce((acc, tx) => {
     const category = tx.Category || "Other";
     const amount = parseFloat(tx.Amount);
@@ -32,73 +40,50 @@ function App() {
 
   const totalSpending = Object.values(totals).reduce((sum, amt) => sum + amt, 0);
 
-
-  const handleParsedData = (data: Transaction[]) => {
-    const categorized = data.map((tx) => ({
-      ...tx,
-      Category: categorize(tx.Description),
-    }));
-    setTransactions(categorized);
-  };
-
-  const thStyle = {
-    border: "1px solid #ccc",
-    padding: "8px",
-    backgroundColor: "#5b5b5bff",
-    textAlign: "left" as const,
-  };
-
-  const tdStyle = {
-    border: "1px solid #ccc",
-    padding: "8px",
-  };
-
-
-
-
   return (
-    <div style={{ padding: "1rem" }}>
-      <h1>SpendWise AI</h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl text-blue-500 font-bold">SpendWise AI</h1>
+
+
       <FileUpload onParse={handleParsedData} />
-      <h2>Parsed Transactions:</h2>
+
       {transactions.length > 0 && (
-        <div style={{ marginTop: "2rem" }}>
-          <h2>Spending Summary</h2>
-          <p><strong>Total Spending:</strong> ${totalSpending.toFixed(2)}</p>
-          <ul>
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-2">Spending Summary</h2>
+          <p className="mb-2 font-medium">
+            Total Spending: <span className="text-green-600">${totalSpending.toFixed(2)}</span>
+          </p>
+          <ul className="list-disc list-inside mb-4">
             {Object.entries(totals).map(([cat, amt]) => (
-              // sourcery skip: binary-operator-identity
               <li key={cat}>
                 {cat}: ${amt.toFixed(2)}
               </li>
             ))}
           </ul>
+
+          <h2 className="text-xl font-semibold mb-2">Parsed Transactions</h2>
+          <table className="table-auto border-collapse w-full mt-2 text-sm">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="border px-4 py-2 text-left">Date</th>
+                <th className="border px-4 py-2 text-left">Description</th>
+                <th className="border px-4 py-2 text-left">Amount</th>
+                <th className="border px-4 py-2 text-left">Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((tx, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="border px-4 py-2">{tx.Date}</td>
+                  <td className="border px-4 py-2">{tx.Description}</td>
+                  <td className="border px-4 py-2">${parseFloat(tx.Amount).toFixed(2)}</td>
+                  <td className="border px-4 py-2">{tx.Category}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
-
-      {transactions.length > 0 && (
-        <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "1rem" }}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Date</th>
-              <th style={thStyle}>Description</th>
-              <th style={thStyle}>Amount</th>
-              <th style={thStyle}>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            {transactions.map((tx, idx) => (
-              <tr key={idx}>
-                <td style={tdStyle}>{tx.Date}</td>
-                <td style={tdStyle}>{tx.Description}</td>
-                <td style={tdStyle}>${parseFloat(tx.Amount).toFixed(2)}</td>
-                <td style={tdStyle}>{tx.Category}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
     </div>
   );
 }
